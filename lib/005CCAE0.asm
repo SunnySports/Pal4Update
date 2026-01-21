@@ -136,6 +136,9 @@
 	call 0x004235A0
 	mov ecx, eax
 	call 0x004240C0 ; 切换移动方式
+	jmp @JumpFix
+
+@JumpFix_ret:
 	lea eax, [esp+0x0C]
 	push eax
 	call 0x00518460
@@ -203,5 +206,17 @@
 	mov dword ptr fs:[0x00000000], ecx
 	add esp, 0x6C
 	ret 0x10
+
+!pad 90
+
+<00981000..00981020>
+
+@JumpFix:
+	call 0x004235A0
+	lea ecx, [eax+0x8C]
+	push 0x01 ; 0=可跳跃，1=不可跳跃
+	mov eax, dword ptr [ecx]
+	call dword ptr [eax+0x20] ; 切换跳跃开关
+	jmp @JumpFix_ret
 
 !pad 90
