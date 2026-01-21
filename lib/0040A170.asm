@@ -331,9 +331,7 @@
 	mov eax, dword ptr [0x008E3D90]
 	add esp, 0x08
 	mov eax, dword ptr [eax+0x68]
-	cmp eax, 0x56
-	jz short @L00000026
-	cmp eax, 0x76
+	cmp eax, 0x8B ; 语音开启/关闭的快捷键由V调整为F11
 	jnz @L00000037
 
 @L00000026:
@@ -1290,7 +1288,6 @@
 	add esp, 0x1D8
 	ret 0x10
 
-!align 4
 @L00000075:
 	dword @L00000001
 	dword @L00000011
@@ -1299,7 +1296,6 @@
 	dword @L00000003
 	dword @L00000006
 
-!align 4
 @L00000076:
 	dword @L00000014
 	dword @L00000038
@@ -1307,7 +1303,6 @@
 	dword @L00000021
 	dword @L00000071
 
-!align 4
 @L00000077:
 	byte 0
 	byte 4
@@ -1536,7 +1531,6 @@
 	byte 2
 	byte 3
 
-!align 4
 @L00000078:
 	dword @L00000045
 	dword @L00000047
@@ -1544,7 +1538,6 @@
 	dword @L00000042
 	dword @L00000071
 
-!align 4
 @L00000079:
 	byte 0
 	byte 1
@@ -1800,7 +1793,6 @@
 	byte 4
 	byte 3
 
-!align 4
 @L00000080:
 	dword @L00000064
 	dword @L00000062
@@ -1813,7 +1805,6 @@
 	dword @L00000051
 	dword @L00000071
 
-!align 4
 @L00000081:
 	byte 0
 	byte 1
