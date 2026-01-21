@@ -21,7 +21,7 @@
 	call 0x004CFC60
 	fmul dword ptr [esp+0x08]
 	fsubr dword ptr [esp]
-	fcom dword ptr [0x00841934]
+	fcom dword ptr [0x008426A8]
 	fnstsw ax
 	test ah, 0x05
 	jp short @L00000001

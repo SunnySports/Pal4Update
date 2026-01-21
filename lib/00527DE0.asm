@@ -22,6 +22,10 @@
 	cmp esi, dword ptr [edi+0x74]
 	fstp dword ptr [esp+0x28]
 	jz short @L00000003
+	jmp @XingdongzhiFix
+
+@XingdongzhiFix_ret:
+	mov esi, dword ptr [edi+0x70]
 	push ebx
 	mov ebx, dword ptr [esp+0x2C]
 
@@ -62,5 +66,26 @@
 	pop esi
 	add esp, 0x1C
 	ret 0x04
+
+!pad 90
+
+<009810C0..009810F0>
+
+@XingdongzhiFix:
+	mov ecx, dword ptr [esi]
+	call 0x00529700
+	fcomp dword ptr [0x008441C4]
+	fnstsw ax
+	test ah, 0x01
+	jz short @L00000004
+	mov eax, dword ptr [edi+0x74]
+	add esi, 0x04
+	cmp esi, eax
+	jnz short @XingdongzhiFix
+	jmp short @f
+
+@L00000004:
+	mov dword ptr [esp+0x28], 0x00
+	@@:jmp @XingdongzhiFix_ret
 
 !pad 90
