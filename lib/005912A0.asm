@@ -173,18 +173,13 @@
 	mov ebx, dword ptr [esp+0x64]
 
 @L00000013:
-	push 0x00
-	call 0x0073BA82
-	push eax
-	call 0x0073BB5E
-	add esp, 0x08
-	call 0x0073BB68
-	cdq
-	mov ecx, 0x64
 	mov dword ptr [esi+0x184], ebp
-	idiv ecx
+	call 0x407410 ; 获取随机数
+	xor edx, edx
+	mov ecx, 0x64
+	div ecx ; edx=0到99随机整数
 	cmp edx, ebx
-	jnl @L00000018
+	jnl @L00000018 ; 锻冶成功条件：随机数＜ebx
 	mov edx, dword ptr [edi+0x144]
 	mov ecx, esi
 	test edx, edx
