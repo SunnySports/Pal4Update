@@ -71,9 +71,9 @@
 	fstp dword ptr [esp+0x10]
 
 @L00000002:
-	mov eax, dword ptr [esi]
+	mov eax, dword ptr [edi] ; 物理伤害追加BUG修复
 	push 0x00
-	mov ecx, esi
+	mov ecx, edi ; 物理伤害追加BUG修复
 	call dword ptr [eax+0x58]
 	mov dword ptr [esp+0x14], eax
 	mov eax, dword ptr [esp+0x0C]
