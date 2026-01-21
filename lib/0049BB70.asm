@@ -11,12 +11,10 @@
 	push esi
 	mov esi, ecx
 	jnz @L00000020
-	push ebx
-	push ebp
-	push edi
-	call 0x00499F30
+	jmp @DuanyeFix
+
+@DuanyeFix_ret:
 	mov ecx, esi
-	mov edi, eax
 	call 0x00499F10
 	push eax
 	push edi
@@ -317,6 +315,58 @@
 	pop ebx
 
 @L00000020:
+	mov ecx, dword ptr [esp+0x34]
+	mov al, 0x01
+	pop esi
+	mov dword ptr fs:[0x00000000], ecx
+	add esp, 0x3C
+	ret 0x04
+
+!pad 90
+
+<00981020..009810C0>
+
+@DuanyeFix:
+	push ebx
+	push ebp
+	push edi
+	call 0x00499F30
+	mov edi,eax
+	mov ecx,esi
+	call 0x499F10
+	push 0x7
+	push eax
+	call 0x4C5E80
+	mov ecx,eax
+	add ecx,0x7C
+	call 0x4C4840
+	cmp dword ptr [eax+0x184],0x0
+	jg @DuanyeFix_ret
+	call 0x4BB650
+	mov ecx,eax
+	call 0x4BF610
+	mov ebp,eax
+	mov dword ptr [esp+0x10],0x3E99999A
+	mov dword ptr [esp+0x14],0x3E99999A
+	push 0xBE
+	call 0x50C770
+	mov ecx,eax
+	add ecx,0x34
+	call 0x500E90
+	mov eax,dword ptr [eax+0x4]
+	test eax,eax
+	jne short @f
+	mov eax,0x841964
+	@@:lea ecx,dword ptr [esp+0x10]
+	push 0x0
+	push 0x4
+	push ecx
+	push eax
+	mov ecx,ebp
+	call 0x4AA810
+	pop edi
+	pop ebp
+	pop ebx
 	mov ecx, dword ptr [esp+0x34]
 	mov al, 0x01
 	pop esi
