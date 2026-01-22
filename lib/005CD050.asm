@@ -8,20 +8,20 @@
 	push esi
 	mov eax, 0x01
 	push edi
+	xor edi, edi
 	; 自动战斗。0=关，1=开，2=询问。
-	mov dword ptr [ebp], 0x00 ; 自动战斗关闭
+	mov dword ptr [ebp], edi ; 自动战斗关闭
 	; 行动序列。0=显示我方，1=显示敌方，2=显示全部。
 	mov dword ptr [ebp+0x04], 0x02; 行动序列显示全部
 	; 新手教学。0=关，1=开。
 	mov dword ptr [ebp+0x08], eax ; 新手教学开启
 	; 可视距离。0=远，1=近。
-	mov dword ptr [ebp+0x0C], eax ; 可视距离为近
+	mov dword ptr [ebp+0x0C], edi ; 可视距离为远
 	mov dword ptr [ebp+0x10], eax
 	; 语音。0=关，1=开。
 	mov byte ptr [ebp+0x14], al ; 语音开启
 	call 0x00658070
 	mov esi, eax
-	xor edi, edi
 	mov dword ptr [esi], 0x3E99999A ; 音乐=0.3
 
 @L00000001:
