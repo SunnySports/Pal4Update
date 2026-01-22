@@ -15,7 +15,8 @@
 	fsub dword ptr [esp+0x0C]
 	mov esi, eax
 	xor edi, edi
-	fstp dword ptr [esi+0x08] ; 设置音效2音量
+	fst dword ptr [esi+0x08] ; 设置音效2音量
+	fstp dword ptr [0x93CEF8]
 
 @L00000001:
 	mov ecx, dword ptr [esi+0x44]
@@ -52,7 +53,8 @@
 	fsub dword ptr [esp+0x0C]
 	mov esi, eax
 	xor edi, edi
-	fstp dword ptr [esi+0x04] ; 设置音效1音量
+	fst dword ptr [esi+0x04] ; 设置音效1音量
+	fstp dword ptr [0x93CEFC]
 
 @L00000004:
 	mov ecx, dword ptr [esi+0x34]

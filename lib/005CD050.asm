@@ -22,7 +22,9 @@
 	mov byte ptr [ebp+0x14], al ; 语音开启
 	call 0x00658070
 	mov esi, eax
-	mov dword ptr [esi], 0x3E99999A ; 音乐=0.3
+	mov ecx, 0x3E99999A
+	mov dword ptr [esi], ecx ; 音乐音量=0.3
+	mov dword ptr [0x93CF00], ecx
 
 @L00000001:
 	mov ecx, dword ptr [esi+0x24]
@@ -49,7 +51,9 @@
 	call 0x00658070
 	mov esi, eax
 	xor edi, edi
-	mov dword ptr [esi+0x04], 0x3F4CCCCD ; 音效1=0.8
+	mov ecx, 0x3F4CCCCD
+	mov dword ptr [esi+0x04], ecx ; 音效1音量=0.8
+	mov dword ptr [0x93CEFC], ecx
 
 @L00000004:
 	mov ecx, dword ptr [esi+0x34]
@@ -81,17 +85,19 @@
 	call 0x00658070
 	mov esi, eax
 	xor edi, edi
-	mov dword ptr [esi+0x08], 0x3F4CCCCD ; 音效2=0.8
+	mov ecx, 0x3F4CCCCD
+	mov dword ptr [esi+0x08], ecx ; 音效2音量=0.8
+	mov dword ptr [0x93CEF8], ecx
 
 @L00000007:
 	mov ecx, dword ptr [esi+0x44]
 	test ecx, ecx
-	jz short @L00000009
+	jz @L00000009
 	mov eax, dword ptr [esi+0x48]
 	sub eax, ecx
 	sar eax, 0x02
 	cmp edi, eax
-	jnb short @L00000009
+	jnb @L00000009
 	mov eax, ecx
 	mov ecx, dword ptr [eax+edi*4]
 	test ecx, ecx
@@ -108,6 +114,10 @@
 @L00000008:
 	inc edi
 	jmp short @L00000007
+
+!pad 90
+
+<00981380..00981390>
 
 @L00000009:
 	mov eax, dword ptr [ebp+0x0C]

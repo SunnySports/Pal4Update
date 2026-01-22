@@ -47,7 +47,8 @@
 	fld dword ptr [esp+0x10]
 	mov edi, eax
 	xor ebx, ebx
-	fstp dword ptr [edi] ; 音乐音量
+	fst dword ptr [edi] ; 音乐音量
+	fstp dword ptr [0x93CF00]
 
 @L00000001:
 	mov ecx, dword ptr [edi+0x24]
@@ -80,7 +81,8 @@
 	fld dword ptr [esp+0x18]
 	mov esi, eax
 	xor edi, edi
-	fstp dword ptr [esi+0x04] ; 音效1音量
+	fst dword ptr [esi+0x04] ; 音效1音量
+	fstp dword ptr [0x93CEFC]
 
 @L00000004:
 	mov ecx, dword ptr [esi+0x34]
@@ -113,17 +115,18 @@
 	fld dword ptr [esp+0x18]
 	mov esi, eax
 	xor edi, edi
-	fstp dword ptr [esi+0x08] ; 音效2音量
+	fst dword ptr [esi+0x08] ; 音效2音量
+	fstp dword ptr [0x93CEF8]
 
 @L00000007:
 	mov ecx, dword ptr [esi+0x44]
 	test ecx, ecx
-	jz short @L00000009
+	jz @L00000009
 	mov eax, dword ptr [esi+0x48]
 	sub eax, ecx
 	sar eax, 0x02
 	cmp edi, eax
-	jnb short @L00000009
+	jnb @L00000009
 	mov eax, ecx
 	mov ecx, dword ptr [eax+edi*4]
 	test ecx, ecx
@@ -140,6 +143,10 @@
 @L00000008:
 	inc edi
 	jmp short @L00000007
+
+!pad 90
+
+<00981390..009813B0>
 
 @L00000009:
 	mov eax, dword ptr [ebp+0x0C]

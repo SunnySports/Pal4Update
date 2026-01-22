@@ -13,7 +13,8 @@
 	fsub dword ptr [esp+0x08]
 	mov esi, eax
 	xor edi, edi
-	fstp dword ptr [esi] ; 设置音乐音量
+	fst dword ptr [esi] ; 设置音乐音量
+	fstp dword ptr [0x93CF00]
 
 @L00000001:
 	mov ecx, dword ptr [esi+0x24]

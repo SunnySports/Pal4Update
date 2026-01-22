@@ -36,16 +36,14 @@
 	push edi
 	mov ecx, esi
 	call 0x005EC310
-	call 0x00658070
-	fld dword ptr [eax] ; 音乐音量
+	fld dword ptr [0x93CF00] ; 音乐音量
 	lea ecx, [esp+0x10]
 	push 0x04
 	push ecx
 	mov ecx, esi
 	fstp dword ptr [esp+0x18]
 	call 0x005EC310
-	call 0x00658070
-	fld dword ptr [eax+0x04] ; 音效音量
+	fld dword ptr [0x93CEFC] ; 音效音量
 	lea edx, [esp+0x08]
 	push 0x04
 	fstp dword ptr [esp+0x0C]
