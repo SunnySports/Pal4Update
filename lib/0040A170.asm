@@ -26,11 +26,11 @@
 @L00000001:
 	push 0x01
 	push ebp
-	call dword ptr [0x008416FC]
+	call dword ptr [0x008416FC] ; DragAcceptFiles
 	push 0x8E3DF0
 	push -1
 	push ebx
-	call dword ptr [0x00841730]
+	call dword ptr [0x00841730] ; EnumDisplaySettingsA
 	jmp @L00000070
 
 @L00000002:
@@ -83,18 +83,18 @@
 	mov ecx, eax
 	call 0x00407770
 	push ebx
-	call dword ptr [0x00841768]
+	call dword ptr [0x00841768] ; ClipCursor
 	mov eax, dword ptr [0x008E3D94]
-	push 0x02
-	push ebp
 	mov dword ptr [eax+0x28], ebx
-	call dword ptr [0x0084173C]
+	jmp @WindowFix1
+
+@WindowFix1_ret:
 	mov ecx, dword ptr [0x008E3D94]
 	cmp dword ptr [ecx+0x08], ebx
 	jz short @L00000007
 	push 0x40000009
 	push 0x8E3DF0
-	call dword ptr [0x00841724]
+	call dword ptr [0x00841724] ; ChangeDisplaySettingsA
 
 @L00000007:
 	mov edx, dword ptr [0x008E3D94]
@@ -126,7 +126,7 @@
 	mov dword ptr [esp+0xB0], edx
 	push eax
 	mov dword ptr [esp+0x6C], 0x180000
-	call dword ptr [0x00841724]
+	call dword ptr [0x00841724] ; ChangeDisplaySettingsA
 
 @L00000009:
 	push ebx
@@ -159,9 +159,6 @@
 	rep stosd
 	call 0x004081F0
 	mov ecx, dword ptr [0x008E3D94]
-	mov esi, dword ptr [0x0084173C]
-	push 0x09
-	push ebp
 	mov dword ptr [ecx+0x56C], eax
 	mov edx, dword ptr [0x008E3D94]
 	mov dword ptr [edx+0x574], eax
@@ -173,20 +170,22 @@
 	mov eax, dword ptr [0x008E3D94]
 	mov edx, ecx
 	mov dword ptr [eax+0x570], edx
-	call esi
-	push 0x05
+	jmp @WindowFix2
+
+@WindowFix2_ret:
+	push 0x05 ;; int nCmdShow = SW_SHOW
+	push ebp ;; HWND hWnd
+	call dword ptr [0x0084173C] ; ShowWindow
 	push ebp
-	call esi
+	call dword ptr [0x0084177C] ; SetForegroundWindow
 	push ebp
-	call dword ptr [0x0084177C]
-	push ebp
-	call dword ptr [0x00841778]
+	call dword ptr [0x00841778] ; SetFocus
 	push 0x01
 	call 0x00658070
 	mov ecx, eax
 	call 0x00658B70
 	push 0x1F4
-	call dword ptr [0x008415C0]
+	call dword ptr [0x008415C0] ; Sleep
 	mov edi, dword ptr [esp+0x1F4]
 	mov esi, dword ptr [esp+0x1F0]
 	jmp @L00000070
@@ -197,11 +196,11 @@
 	jz short @L00000012
 	push 0x40000009
 	push 0x8E3DF0
-	call dword ptr [0x00841724]
+	call dword ptr [0x00841724] ; ChangeDisplaySettingsA
 
 @L00000012:
 	push ebx
-	call dword ptr [0x00841768]
+	call dword ptr [0x00841768] ; ClipCursor
 	mov edx, dword ptr [0x008E3D90]
 	mov byte ptr [edx+0x0C], 0x01
 	jmp @L00000070
@@ -545,11 +544,11 @@
 	call 0x00407770
 	push 0x05
 	push ebp
-	call dword ptr [0x0084173C]
+	call dword ptr [0x0084173C] ; ShowWindow
 	push ebp
-	call dword ptr [0x0084177C]
+	call dword ptr [0x0084177C] ; SetForegroundWindow
 	push ebp
-	call dword ptr [0x00841778]
+	call dword ptr [0x00841778] ; SetFocus
 	jmp @L00000071
 
 @L00000040:
@@ -757,7 +756,7 @@
 	mov edx, dword ptr [0x008E3D94]
 	mov ecx, dword ptr [eax+0x34]
 	mov dword ptr [edx+0x14], ecx
-	call dword ptr [0x00841774]
+	call dword ptr [0x00841774] ; SetCapture
 	mov eax, dword ptr [0x008E3D90]
 	add eax, 0x30
 	push eax
@@ -781,7 +780,7 @@
 	push edx
 	push -1
 	push eax
-	call dword ptr [0x008416F4]
+	call dword ptr [0x008416F4] ; DragQueryFileA
 	mov ebp, eax
 	dec ebp
 	js @L00000059
@@ -794,7 +793,7 @@
 	push ebp
 	push edx
 	xor edi, edi
-	call dword ptr [0x008416F4]
+	call dword ptr [0x008416F4] ; DragQueryFileA
 	mov ecx, dword ptr [0x00950CD0]
 	lea eax, [esp+0xD8]
 	push eax
@@ -859,7 +858,7 @@
 	mov edx, dword ptr [esp+0x1F8]
 	add esp, 0x04
 	push edx
-	call dword ptr [0x008416F8]
+	call dword ptr [0x008416F8] ; DragFinish
 	mov ebp, dword ptr [esp+0x1EC]
 	mov edi, dword ptr [esp+0x1F4]
 	mov esi, dword ptr [esp+0x1F0]
@@ -880,7 +879,7 @@
 	push ebx
 	push ebx
 	push ebp
-	call dword ptr [0x00841718]
+	call dword ptr [0x00841718] ; SetWindowPos
 	call 0x00409910
 	mov dword ptr [esp+0x10], eax
 	call 0x005EADE0
@@ -941,7 +940,7 @@
 	mov dword ptr [eax+0x48], 0x01
 	mov ecx, dword ptr [0x008E3D90]
 	mov dword ptr [ecx+0x4C], ebx
-	call dword ptr [0x00841774]
+	call dword ptr [0x00841774] ; SetCapture
 	mov edx, dword ptr [0x008E3D90]
 	add edx, 0x30
 	push edx
@@ -988,7 +987,7 @@
 	mov dword ptr [eax+0x48], ebx
 	mov ecx, dword ptr [0x008E3D90]
 	mov dword ptr [ecx+0x4C], ebx
-	call dword ptr [0x00841774]
+	call dword ptr [0x00841774] ; SetCapture
 	mov edx, dword ptr [0x008E3D90]
 	add edx, 0x30
 	push edx
@@ -1150,7 +1149,7 @@
 	jz @L00000070
 	call dword ptr [0x00841770]
 	push ebx
-	call dword ptr [0x00841768]
+	call dword ptr [0x00841768] ; ClipCursor
 	mov edx, dword ptr [0x008E3D90]
 	movsx ecx, word ptr [esp+0x1F8]
 	movsx eax, word ptr [esp+0x1FA]
@@ -1198,7 +1197,7 @@
 	jz @L00000070
 	call dword ptr [0x00841770]
 	push ebx
-	call dword ptr [0x00841768]
+	call dword ptr [0x00841768] ; ClipCursor
 	mov edx, dword ptr [0x008E3D90]
 	movsx ecx, word ptr [esp+0x1F8]
 	movsx eax, word ptr [esp+0x1FA]
@@ -1856,5 +1855,29 @@
 	byte 9
 	byte 9
 	byte 8
+
+!pad 90
+
+<00981340..00981380>
+
+@WindowFix1:
+	mov ecx,dword ptr [0x8E3D94]
+	mov eax,dword ptr [ecx+0x8] ; 0=窗口模式，1=全屏模式
+	test eax,eax
+	je short @f ; 如果游戏以窗口模式运行，则不会最小化窗口
+	push 0x02 ;; int nCmdShow = SW_SHOWMINIMIZED
+	push ebp ;; HWND hWnd
+	call dword ptr [0x0084173C] ; ShowWindow
+	@@:jmp @WindowFix1_ret
+
+@WindowFix2:
+	mov ecx,dword ptr [0x8E3D94]
+	mov eax,dword ptr [ecx+0x8] ; 0=窗口模式，1=全屏模式
+	test eax,eax
+	je short @f ; 如果游戏以窗口模式运行，则不会还原窗口
+	push 0x09 ;; int nCmdShow = SW_RESTORE
+	push ebp ;; HWND hWnd
+	call dword ptr [0x0084173C] ; ShowWindow
+	@@:jmp @WindowFix2_ret
 
 !pad 90
