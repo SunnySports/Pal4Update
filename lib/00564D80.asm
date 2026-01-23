@@ -22,12 +22,7 @@
 	mov edi, eax
 	test edi, edi
 	jz short @L00000002
-	lea ecx, [esp+0x14]
-	push ecx ; Task的3个属性
-	push ebx ; Task类型：checkJointAtk
-	push edi ; Task对象
-	lea ecx, [esi+0x04]
-	call 0x005ECE40 ; 设置Task的属性
+	jmp @JointAtkTimeFix
 
 @L00000002:
 	mov eax, dword ptr [esi+0x2C] ; 进行普通攻击的人
@@ -160,5 +155,28 @@
 	pop ebx
 	add esp, 0x20
 	ret
+
+!pad 90
+
+<009813B0..009813F0>
+
+@JointAtkTimeFix:
+	mov ecx, dword ptr [esi+0x2C] ; 进行普通攻击的人
+	cmp dword ptr [ecx+0x324],0x1 ; 阵营，1=我方，2=敌方
+	jne short @f
+	mov eax,dword ptr [ecx]
+	call dword ptr [eax+0x1A8] ; 获取人物攻击方式，0=近战，1=远程
+	test eax,eax
+	je short @f
+	; 当我方人物使用远程攻击，则使checkJointAtkTask的预期时间增加为0.8秒
+	mov dword ptr [esp+0x1C], 0x3F4CCCCD ; Attr_Task_Expect_Time=0.8
+	@@:lea ecx, [esp+0x14]
+	push ecx ; Task的3个属性
+	push ebx ; Task类型：checkJointAtk
+	push edi ; Task对象
+	lea ecx, [esi+0x04]
+	call 0x005ECE40 ; 设置Task的属性
+	mov dword ptr [esp+0x1C], 0x00 ; 后续Task可能会用这个局部变量，所以改回0
+	jmp @L00000002
 
 !pad 90
