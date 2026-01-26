@@ -226,13 +226,13 @@
 	fild dword ptr [esp+0x14] ; 己方在场人数
 	mov ecx, eax
 	fdivr dword ptr [esp+0x10] ; 己方在场且死亡人数/己方在场人数
-	fld dword ptr [edi+0x14] ; ACA_MATE_DEAD
+	fld dword ptr [edi+0x10] ; ACA_MATE_DEAD
 	fld st1
 	fcompp
 	fnstsw ax
 	and eax, 0x100
 	jnz short @L00000010 ; 跳转条件：己方在场且死亡人数/己方在场人数<ACA_MATE_DEAD
-	fld dword ptr [edi+0x14] ; ACA_MATE_DEAD
+	fld dword ptr [edi+0x10] ; ACA_MATE_DEAD
 	mov eax, dword ptr [esp+0x14]
 	sub esp, 0x10
 	fstp qword ptr [esp+0x08]
@@ -298,7 +298,7 @@
 	mov dword ptr [esp+0x14], eax
 	fild dword ptr [esp+0x14]
 	fdivr dword ptr [esp+0x10] ; 精目前值/精最大值
-	fld dword ptr [edi+0x10] ; ACA_MATE_IN_DANGER
+	fld dword ptr [edi+0x14] ; ACA_MATE_IN_DANGER
 	fld st1
 	fcompp
 	fnstsw ax
@@ -370,7 +370,7 @@
 
 @L00000015:
 	mov eax, dword ptr [esi+0x330] ; 人物名字
-	fld dword ptr [edi+0x10] ; ACA_MATE_IN_DANGER
+	fld dword ptr [edi+0x14] ; ACA_MATE_IN_DANGER
 	test eax, eax
 	mov edi, 0x841964
 	jz short @L00000016

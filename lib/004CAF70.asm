@@ -71,14 +71,14 @@
 	mov ecx, 0x8EE740
 	mov byte ptr [0x008EE740], dl
 	call 0x00405A10 ; 设为空字符串
-	mov edi, 0x8B2CC4 ;; 8B2CC4:"ACA_MATE_IN_DANGER"
+	mov edi, 0x8B2CB4 ;; 8B2CB4:"ACA_MATE_DEAD"
 	or ecx, 0xFFFFFFFF
 	xor eax, eax
 	repne scasb
 	not ecx
 	dec ecx
 	push ecx ; Arg2
-	push 0x8B2CC4 ; Arg1 = "ACA_MATE_IN_DANGER"
+	push 0x8B2CB4 ; Arg1 = "ACA_MATE_DEAD"
 	mov ecx, 0x8EE740
 	call 0x004094B0 ; 复制指定长度字符串
 	mov al, byte ptr [esp+0x0F]
@@ -86,7 +86,7 @@
 	mov ecx, 0x8EE750
 	mov byte ptr [0x008EE750], al
 	call 0x00405A10 ; 设为空字符串
-	mov edi, 0x8B2CB4 ;; 8B2CB4:"ACA_MATE_DEAD"
+	mov edi, 0x8B2CC4 ;; 8B2CC4:"ACA_MATE_IN_DANGER"
 	or ecx, 0xFFFFFFFF
 	xor eax, eax
 	push 0x01 ; Arg2 = 1
@@ -102,7 +102,7 @@
 	mov edi, dword ptr [0x008EE754]
 	mov ecx, ebx
 	mov edx, ecx
-	mov esi, 0x8B2CB4 ;; 8B2CB4:"ACA_MATE_DEAD"
+	mov esi, 0x8B2CC4 ;; 8B2CC4:"ACA_MATE_IN_DANGER"
 	shr ecx, 0x02
 	rep movsd
 	mov ecx, edx
