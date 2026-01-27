@@ -62,6 +62,8 @@
 	push eax
 	push 0x02
 	call 0x005C2F30 ; 获得特等战斗评分次数+1
+
+@CombatPrize0_1:
 	mov dl, byte ptr [esp+0x27]
 	mov dword ptr [esp+0x2C], ebx ; 新建空列表
 	mov byte ptr [esp+0x28], dl
@@ -111,51 +113,16 @@
 @L00000005:
 	mov ecx, dword ptr [esp+0x2C]
 	cmp ecx, ebx
-	jnz short @L00000006
-	xor eax, eax
-	jmp short @L00000007
-
-@L00000006:
+	jz @CombatPrize0_2
 	mov eax, dword ptr [esp+0x30]
 	sub eax, ecx
 	sar eax, 0x02 ; n=指定道具等级的物品数量
-
-; 下面开始在列表中随机选取一个物品，并添加到战斗评分奖励中
-; 但是随机n选1这么简单的事情，却搞得十分复杂
-; 而且存在BUG，在n>1时导致列表中的最后一个物品不会被选择
-; 被遗漏的物品有：元祖星空、八味檀香散、血凝精、蜂王蜜、日辉晶魄
-; 本函数中共计有14处这样的代码段
-; BUG代码段1
-@L00000007:
-	dec eax ; eax=n-1，BUG，导致n>1时选不到最后一个物品
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], eax ; n-1
-	mov dword ptr [esp+0x1C], 0x00
-	fild qword ptr [esp+0x14]
-	fstp dword ptr [esp+0x10] ; n-1，转为float
-	fld dword ptr [0x00841934]
-	fcomp dword ptr [esp+0x10]
-	fnstsw ax
-	and eax, 0x4100
-	jnz short @L00000008
-	fld dword ptr [esp+0x10]
-	mov dword ptr [esp+0x10], 0x00
-	fstp dword ptr [esp+0x1C]
-
-@L00000008:
+	mov dword ptr [esp+0x14], eax ; n
 	call 0x00407410 ; 获取随机数
 	xor edx, edx
-	mov ecx, 0x3E8
-	div ecx ; edx=0到999随机整数
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], edx
-	fild qword ptr [esp+0x14] ; 0到999随机整数，转为float
-	fmul dword ptr [0x0084198C] ; 乘以0.001，得到0到0.999随机数
-	fld dword ptr [esp+0x10] ; n-1
-	fsub dword ptr [esp+0x1C]
-	fmulp ; (n-1)*0到0.999随机数
-	fadd dword ptr [esp+0x1C]
-	call 0x0073AD9C ; 把浮点数转为整数（向零取整），若n>1，结果为0到n-2整数
+	mov ecx, dword ptr [esp+0x14] ; n
+	div ecx ; edx=0到n-1随机整数
+	mov eax, edx ; 0到n-1随机整数
 	mov edx, dword ptr [esp+0x2C]
 	lea ecx, [esp+0x58]
 	mov dword ptr [esp+0x38], ebx
@@ -186,8 +153,10 @@
 	mov edx, dword ptr [esp+0x2C]
 	push edx
 	call 0x00402CA0
-	mov al, byte ptr [esp+0x2B]
 	add esp, 0x04
+
+@CombatPrize0_2:
+	mov al, byte ptr [esp+0x27]
 	mov byte ptr [esp+0x28], al
 	mov dword ptr [esp+0x2C], ebx
 	mov dword ptr [esp+0x30], ebx
@@ -241,46 +210,16 @@
 @L00000011:
 	mov ecx, dword ptr [esp+0x2C]
 	cmp ecx, ebx
-	jnz short @L00000012
-	xor eax, eax
-	jmp short @L00000013
-
-@L00000012:
+	jz @CombatPrize0_3
 	mov eax, dword ptr [esp+0x30]
 	sub eax, ecx
 	sar eax, 0x02
-
-; BUG代码段2
-@L00000013:
-	dec eax
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], eax
-	mov dword ptr [esp+0x1C], 0x00
-	fild qword ptr [esp+0x14]
-	fstp dword ptr [esp+0x10]
-	fld dword ptr [0x00841934]
-	fcomp dword ptr [esp+0x10]
-	fnstsw ax
-	and eax, 0x4100
-	jnz short @L00000014
-	fld dword ptr [esp+0x10]
-	mov dword ptr [esp+0x10], 0x00
-	fstp dword ptr [esp+0x1C]
-
-@L00000014:
-	call 0x00407410
+	mov dword ptr [esp+0x14], eax ; n
+	call 0x00407410 ; 获取随机数
 	xor edx, edx
-	mov ecx, 0x3E8
-	div ecx
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], edx
-	fild qword ptr [esp+0x14]
-	fmul dword ptr [0x0084198C]
-	fld dword ptr [esp+0x10]
-	fsub dword ptr [esp+0x1C]
-	fmulp
-	fadd dword ptr [esp+0x1C]
-	call 0x0073AD9C
+	mov ecx, dword ptr [esp+0x14] ; n
+	div ecx ; edx=0到n-1随机整数
+	mov eax, edx ; 0到n-1随机整数
 	mov edx, dword ptr [esp+0x2C]
 	lea ecx, [esp+0x6C]
 	mov dword ptr [esp+0x14], ebx
@@ -311,8 +250,10 @@
 	mov edx, dword ptr [esp+0x2C]
 	push edx
 	call 0x00402CA0
-	mov al, byte ptr [esp+0x2B]
 	add esp, 0x04
+
+@CombatPrize0_3:
+	mov al, byte ptr [esp+0x27]
 	mov byte ptr [esp+0x28], al
 	mov dword ptr [esp+0x2C], ebx
 	mov dword ptr [esp+0x30], ebx
@@ -366,46 +307,16 @@
 @L00000017:
 	mov ecx, dword ptr [esp+0x2C]
 	cmp ecx, ebx
-	jnz short @L00000018
-	xor eax, eax
-	jmp short @L00000019
-
-@L00000018:
+	jz @CombatPrize0_4
 	mov eax, dword ptr [esp+0x30]
 	sub eax, ecx
 	sar eax, 0x02
-
-; BUG代码段3
-@L00000019:
-	dec eax
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], eax
-	mov dword ptr [esp+0x1C], 0x00
-	fild qword ptr [esp+0x14]
-	fstp dword ptr [esp+0x10]
-	fld dword ptr [0x00841934]
-	fcomp dword ptr [esp+0x10]
-	fnstsw ax
-	and eax, 0x4100
-	jnz short @L00000020
-	fld dword ptr [esp+0x10]
-	mov dword ptr [esp+0x10], 0x00
-	fstp dword ptr [esp+0x1C]
-
-@L00000020:
-	call 0x00407410
+	mov dword ptr [esp+0x14], eax ; n
+	call 0x00407410 ; 获取随机数
 	xor edx, edx
-	mov ecx, 0x3E8
-	div ecx
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], edx
-	fild qword ptr [esp+0x14]
-	fmul dword ptr [0x0084198C]
-	fld dword ptr [esp+0x10]
-	fsub dword ptr [esp+0x1C]
-	fmulp
-	fadd dword ptr [esp+0x1C]
-	call 0x0073AD9C
+	mov ecx, dword ptr [esp+0x14] ; n
+	div ecx ; edx=0到n-1随机整数
+	mov eax, edx ; 0到n-1随机整数
 	mov edx, dword ptr [esp+0x2C]
 	lea ecx, [esp+0x7C]
 	mov dword ptr [esp+0x14], ebx
@@ -436,8 +347,10 @@
 	mov edx, dword ptr [esp+0x2C]
 	push edx
 	call 0x00402CA0
-	mov al, byte ptr [esp+0x2B]
 	add esp, 0x04
+
+@CombatPrize0_4:
+	mov al, byte ptr [esp+0x27]
 	mov byte ptr [esp+0x28], al
 	mov dword ptr [esp+0x2C], ebx
 	mov dword ptr [esp+0x30], ebx
@@ -491,46 +404,16 @@
 @L00000023:
 	mov ecx, dword ptr [esp+0x2C]
 	cmp ecx, ebx
-	jnz short @L00000024
-	xor eax, eax
-	jmp short @L00000025
-
-@L00000024:
+	jz @CombatPrize0_5
 	mov eax, dword ptr [esp+0x30]
 	sub eax, ecx
 	sar eax, 0x02
-
-; BUG代码段4
-@L00000025:
-	dec eax
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], eax
-	mov dword ptr [esp+0x1C], 0x00
-	fild qword ptr [esp+0x14]
-	fstp dword ptr [esp+0x10]
-	fld dword ptr [0x00841934]
-	fcomp dword ptr [esp+0x10]
-	fnstsw ax
-	and eax, 0x4100
-	jnz short @L00000026
-	fld dword ptr [esp+0x10]
-	mov dword ptr [esp+0x10], 0x00
-	fstp dword ptr [esp+0x1C]
-
-@L00000026:
-	call 0x00407410
+	mov dword ptr [esp+0x14], eax ; n
+	call 0x00407410 ; 获取随机数
 	xor edx, edx
-	mov ecx, 0x3E8
-	div ecx
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], edx
-	fild qword ptr [esp+0x14]
-	fmul dword ptr [0x0084198C]
-	fld dword ptr [esp+0x10]
-	fsub dword ptr [esp+0x1C]
-	fmulp
-	fadd dword ptr [esp+0x1C]
-	call 0x0073AD9C
+	mov ecx, dword ptr [esp+0x14] ; n
+	div ecx ; edx=0到n-1随机整数
+	mov eax, edx ; 0到n-1随机整数
 	mov edx, dword ptr [esp+0x2C]
 	lea ecx, [esp+0x78]
 	mov dword ptr [esp+0x14], ebx
@@ -561,8 +444,10 @@
 	mov edx, dword ptr [esp+0x2C]
 	push edx
 	call 0x00402CA0
-	mov al, byte ptr [esp+0x2B]
 	add esp, 0x04
+
+@CombatPrize0_5:
+	mov al, byte ptr [esp+0x27]
 	mov byte ptr [esp+0x28], al
 	mov dword ptr [esp+0x2C], ebx
 	mov dword ptr [esp+0x30], ebx
@@ -616,46 +501,16 @@
 @L00000029:
 	mov ecx, dword ptr [esp+0x2C]
 	cmp ecx, ebx
-	jnz short @L00000030
-	xor eax, eax
-	jmp short @L00000031
-
-@L00000030:
+	jz @CombatPrize0_6
 	mov eax, dword ptr [esp+0x30]
 	sub eax, ecx
 	sar eax, 0x02
-
-; BUG代码段5
-@L00000031:
-	dec eax
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], eax
-	mov dword ptr [esp+0x1C], 0x00
-	fild qword ptr [esp+0x14]
-	fstp dword ptr [esp+0x10]
-	fld dword ptr [0x00841934]
-	fcomp dword ptr [esp+0x10]
-	fnstsw ax
-	and eax, 0x4100
-	jnz short @L00000032
-	fld dword ptr [esp+0x10]
-	mov dword ptr [esp+0x10], 0x00
-	fstp dword ptr [esp+0x1C]
-
-@L00000032:
-	call 0x00407410
+	mov dword ptr [esp+0x14], eax ; n
+	call 0x00407410 ; 获取随机数
 	xor edx, edx
-	mov ecx, 0x3E8
-	div ecx
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], edx
-	fild qword ptr [esp+0x14]
-	fmul dword ptr [0x0084198C]
-	fld dword ptr [esp+0x10]
-	fsub dword ptr [esp+0x1C]
-	fmulp
-	fadd dword ptr [esp+0x1C]
-	call 0x0073AD9C
+	mov ecx, dword ptr [esp+0x14] ; n
+	div ecx ; edx=0到n-1随机整数
+	mov eax, edx ; 0到n-1随机整数
 	mov edx, dword ptr [esp+0x2C]
 	lea ecx, [esp+0x4C]
 	mov dword ptr [esp+0x14], ebx
@@ -686,8 +541,10 @@
 	mov edx, dword ptr [esp+0x2C]
 	push edx
 	call 0x00402CA0
-	mov al, byte ptr [esp+0x2B]
 	add esp, 0x04
+
+@CombatPrize0_6:
+	mov al, byte ptr [esp+0x27]
 	mov byte ptr [esp+0x28], al
 	mov dword ptr [esp+0x2C], ebx
 	mov dword ptr [esp+0x30], ebx
@@ -741,46 +598,16 @@
 @L00000035:
 	mov ecx, dword ptr [esp+0x2C]
 	cmp ecx, ebx
-	jnz short @L00000036
-	xor eax, eax
-	jmp short @L00000037
-
-@L00000036:
+	jz @CombatPrize0_7
 	mov eax, dword ptr [esp+0x30]
 	sub eax, ecx
 	sar eax, 0x02
-
-; BUG代码段6
-@L00000037:
-	dec eax
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], eax
-	mov dword ptr [esp+0x1C], 0x00
-	fild qword ptr [esp+0x14]
-	fstp dword ptr [esp+0x10]
-	fld dword ptr [0x00841934]
-	fcomp dword ptr [esp+0x10]
-	fnstsw ax
-	and eax, 0x4100
-	jnz short @L00000038
-	fld dword ptr [esp+0x10]
-	mov dword ptr [esp+0x10], 0x00
-	fstp dword ptr [esp+0x1C]
-
-@L00000038:
-	call 0x00407410
+	mov dword ptr [esp+0x14], eax ; n
+	call 0x00407410 ; 获取随机数
 	xor edx, edx
-	mov ecx, 0x3E8
-	div ecx
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], edx
-	fild qword ptr [esp+0x14]
-	fmul dword ptr [0x0084198C]
-	fld dword ptr [esp+0x10]
-	fsub dword ptr [esp+0x1C]
-	fmulp
-	fadd dword ptr [esp+0x1C]
-	call 0x0073AD9C
+	mov ecx, dword ptr [esp+0x14] ; n
+	div ecx ; edx=0到n-1随机整数
+	mov eax, edx ; 0到n-1随机整数
 	mov edx, dword ptr [esp+0x2C]
 	lea ecx, [esp+0x70]
 	mov dword ptr [esp+0x14], ebx
@@ -811,8 +638,10 @@
 	mov edx, dword ptr [esp+0x2C]
 	push edx
 	call 0x00402CA0
-	fild dword ptr [esp+0x94] ; 经验
 	add esp, 0x04
+
+@CombatPrize0_7:
+	fild dword ptr [esp+0x90] ; 经验
 	fmul dword ptr [0x008480E8] ; float 1.9
 	call 0x0073AD9C
 	fild dword ptr [esp+0x84] ; 金钱
@@ -834,6 +663,8 @@
 	push eax
 	push 0x03
 	call 0x005C2F30
+
+@CombatPrize1_1:
 	mov al, byte ptr [esp+0x27]
 	mov dword ptr [esp+0x2C], ebx
 	mov byte ptr [esp+0x28], al
@@ -883,46 +714,16 @@
 @L00000042:
 	mov ecx, dword ptr [esp+0x2C]
 	cmp ecx, ebx
-	jnz short @L00000043
-	xor eax, eax
-	jmp short @L00000044
-
-@L00000043:
+	jz @CombatPrize1_2
 	mov eax, dword ptr [esp+0x30]
 	sub eax, ecx
 	sar eax, 0x02
-
-; BUG代码段7
-@L00000044:
-	dec eax
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], eax
-	mov dword ptr [esp+0x1C], 0x00
-	fild qword ptr [esp+0x14]
-	fstp dword ptr [esp+0x10]
-	fld dword ptr [0x00841934]
-	fcomp dword ptr [esp+0x10]
-	fnstsw ax
-	and eax, 0x4100
-	jnz short @L00000045
-	fld dword ptr [esp+0x10]
-	mov dword ptr [esp+0x10], 0x00
-	fstp dword ptr [esp+0x1C]
-
-@L00000045:
-	call 0x00407410
+	mov dword ptr [esp+0x14], eax ; n
+	call 0x00407410 ; 获取随机数
 	xor edx, edx
-	mov ecx, 0x3E8
-	div ecx
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], edx
-	fild qword ptr [esp+0x14]
-	fmul dword ptr [0x0084198C]
-	fld dword ptr [esp+0x10]
-	fsub dword ptr [esp+0x1C]
-	fmulp
-	fadd dword ptr [esp+0x1C]
-	call 0x0073AD9C
+	mov ecx, dword ptr [esp+0x14] ; n
+	div ecx ; edx=0到n-1随机整数
+	mov eax, edx ; 0到n-1随机整数
 	mov edx, dword ptr [esp+0x2C]
 	lea ecx, [esp+0x60]
 	mov dword ptr [esp+0x14], ebx
@@ -953,8 +754,10 @@
 	mov edx, dword ptr [esp+0x2C]
 	push edx
 	call 0x00402CA0
-	mov al, byte ptr [esp+0x2B]
 	add esp, 0x04
+
+@CombatPrize1_2:
+	mov al, byte ptr [esp+0x27]
 	mov byte ptr [esp+0x28], al
 	mov dword ptr [esp+0x2C], ebx
 	mov dword ptr [esp+0x30], ebx
@@ -1008,46 +811,16 @@
 @L00000048:
 	mov ecx, dword ptr [esp+0x2C]
 	cmp ecx, ebx
-	jnz short @L00000049
-	xor eax, eax
-	jmp short @L00000050
-
-@L00000049:
+	jz @CombatPrize1_3
 	mov eax, dword ptr [esp+0x30]
 	sub eax, ecx
 	sar eax, 0x02
-
-; BUG代码段8
-@L00000050:
-	dec eax
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], eax
-	mov dword ptr [esp+0x1C], 0x00
-	fild qword ptr [esp+0x14]
-	fstp dword ptr [esp+0x10]
-	fld dword ptr [0x00841934]
-	fcomp dword ptr [esp+0x10]
-	fnstsw ax
-	and eax, 0x4100
-	jnz short @L00000051
-	fld dword ptr [esp+0x10]
-	mov dword ptr [esp+0x10], 0x00
-	fstp dword ptr [esp+0x1C]
-
-@L00000051:
-	call 0x00407410
+	mov dword ptr [esp+0x14], eax ; n
+	call 0x00407410 ; 获取随机数
 	xor edx, edx
-	mov ecx, 0x3E8
-	div ecx
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], edx
-	fild qword ptr [esp+0x14]
-	fmul dword ptr [0x0084198C]
-	fld dword ptr [esp+0x10]
-	fsub dword ptr [esp+0x1C]
-	fmulp
-	fadd dword ptr [esp+0x1C]
-	call 0x0073AD9C
+	mov ecx, dword ptr [esp+0x14] ; n
+	div ecx ; edx=0到n-1随机整数
+	mov eax, edx ; 0到n-1随机整数
 	mov edx, dword ptr [esp+0x2C]
 	lea ecx, [esp+0x80]
 	mov dword ptr [esp+0x14], ebx
@@ -1078,8 +851,10 @@
 	mov edx, dword ptr [esp+0x2C]
 	push edx
 	call 0x00402CA0
-	mov al, byte ptr [esp+0x2B]
 	add esp, 0x04
+
+@CombatPrize1_3:
+	mov al, byte ptr [esp+0x27]
 	mov byte ptr [esp+0x28], al
 	mov dword ptr [esp+0x2C], ebx
 	mov dword ptr [esp+0x30], ebx
@@ -1133,46 +908,16 @@
 @L00000054:
 	mov ecx, dword ptr [esp+0x2C]
 	cmp ecx, ebx
-	jnz short @L00000055
-	xor eax, eax
-	jmp short @L00000056
-
-@L00000055:
+	jz @CombatPrize1_4
 	mov eax, dword ptr [esp+0x30]
 	sub eax, ecx
 	sar eax, 0x02
-
-; BUG代码段9
-@L00000056:
-	dec eax
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], eax
-	mov dword ptr [esp+0x1C], 0x00
-	fild qword ptr [esp+0x14]
-	fstp dword ptr [esp+0x10]
-	fld dword ptr [0x00841934]
-	fcomp dword ptr [esp+0x10]
-	fnstsw ax
-	and eax, 0x4100
-	jnz short @L00000057
-	fld dword ptr [esp+0x10]
-	mov dword ptr [esp+0x10], 0x00
-	fstp dword ptr [esp+0x1C]
-
-@L00000057:
-	call 0x00407410
+	mov dword ptr [esp+0x14], eax ; n
+	call 0x00407410 ; 获取随机数
 	xor edx, edx
-	mov ecx, 0x3E8
-	div ecx
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], edx
-	fild qword ptr [esp+0x14]
-	fmul dword ptr [0x0084198C]
-	fld dword ptr [esp+0x10]
-	fsub dword ptr [esp+0x1C]
-	fmulp
-	fadd dword ptr [esp+0x1C]
-	call 0x0073AD9C
+	mov ecx, dword ptr [esp+0x14] ; n
+	div ecx ; edx=0到n-1随机整数
+	mov eax, edx ; 0到n-1随机整数
 	mov edx, dword ptr [esp+0x2C]
 	lea ecx, [esp+0x68]
 	mov dword ptr [esp+0x14], ebx
@@ -1203,8 +948,10 @@
 	mov edx, dword ptr [esp+0x2C]
 	push edx
 	call 0x00402CA0
-	mov al, byte ptr [esp+0x2B]
 	add esp, 0x04
+
+@CombatPrize1_4:
+	mov al, byte ptr [esp+0x27]
 	mov byte ptr [esp+0x28], al
 	mov dword ptr [esp+0x2C], ebx
 	mov dword ptr [esp+0x30], ebx
@@ -1258,46 +1005,16 @@
 @L00000060:
 	mov ecx, dword ptr [esp+0x2C]
 	cmp ecx, ebx
-	jnz short @L00000061
-	xor eax, eax
-	jmp short @L00000062
-
-@L00000061:
+	jz @CombatPrize1_5
 	mov eax, dword ptr [esp+0x30]
 	sub eax, ecx
 	sar eax, 0x02
-
-; BUG代码段10
-@L00000062:
-	dec eax
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], eax
-	mov dword ptr [esp+0x1C], 0x00
-	fild qword ptr [esp+0x14]
-	fstp dword ptr [esp+0x10]
-	fld dword ptr [0x00841934]
-	fcomp dword ptr [esp+0x10]
-	fnstsw ax
-	and eax, 0x4100
-	jnz short @L00000063
-	fld dword ptr [esp+0x10]
-	mov dword ptr [esp+0x10], 0x00
-	fstp dword ptr [esp+0x1C]
-
-@L00000063:
-	call 0x00407410
+	mov dword ptr [esp+0x14], eax ; n
+	call 0x00407410 ; 获取随机数
 	xor edx, edx
-	mov ecx, 0x3E8
-	div ecx
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], edx
-	fild qword ptr [esp+0x14]
-	fmul dword ptr [0x0084198C]
-	fld dword ptr [esp+0x10]
-	fsub dword ptr [esp+0x1C]
-	fmulp
-	fadd dword ptr [esp+0x1C]
-	call 0x0073AD9C
+	mov ecx, dword ptr [esp+0x14] ; n
+	div ecx ; edx=0到n-1随机整数
+	mov eax, edx ; 0到n-1随机整数
 	mov edx, dword ptr [esp+0x2C]
 	lea ecx, [esp+0x50]
 	mov dword ptr [esp+0x14], ebx
@@ -1328,8 +1045,10 @@
 	mov edx, dword ptr [esp+0x2C]
 	push edx
 	call 0x00402CA0
-	fild dword ptr [esp+0x94] ; 经验
 	add esp, 0x04
+
+@CombatPrize1_5:
+	fild dword ptr [esp+0x90] ; 经验
 	fmul dword ptr [0x008480E4] ; float 1.6
 	call 0x0073AD9C
 	fild dword ptr [esp+0x84] ; 金钱
@@ -1351,6 +1070,8 @@
 	push eax
 	push 0x04
 	call 0x005C2F30
+
+@CombatPrize2_1:
 	mov al, byte ptr [esp+0x27]
 	mov dword ptr [esp+0x2C], ebx
 	mov byte ptr [esp+0x28], al
@@ -1400,46 +1121,16 @@
 @L00000067:
 	mov ecx, dword ptr [esp+0x2C]
 	cmp ecx, ebx
-	jnz short @L00000068
-	xor eax, eax
-	jmp short @L00000069
-
-@L00000068:
+	jz @CombatPrize2_2
 	mov eax, dword ptr [esp+0x30]
 	sub eax, ecx
 	sar eax, 0x02
-
-; BUG代码段11
-@L00000069:
-	dec eax
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], eax
-	mov dword ptr [esp+0x1C], 0x00
-	fild qword ptr [esp+0x14]
-	fstp dword ptr [esp+0x10]
-	fld dword ptr [0x00841934]
-	fcomp dword ptr [esp+0x10]
-	fnstsw ax
-	and eax, 0x4100
-	jnz short @L00000070
-	fld dword ptr [esp+0x10]
-	mov dword ptr [esp+0x10], 0x00
-	fstp dword ptr [esp+0x1C]
-
-@L00000070:
-	call 0x00407410
+	mov dword ptr [esp+0x14], eax ; n
+	call 0x00407410 ; 获取随机数
 	xor edx, edx
-	mov ecx, 0x3E8
-	div ecx
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], edx
-	fild qword ptr [esp+0x14]
-	fmul dword ptr [0x0084198C]
-	fld dword ptr [esp+0x10]
-	fsub dword ptr [esp+0x1C]
-	fmulp
-	fadd dword ptr [esp+0x1C]
-	call 0x0073AD9C
+	mov ecx, dword ptr [esp+0x14] ; n
+	div ecx ; edx=0到n-1随机整数
+	mov eax, edx ; 0到n-1随机整数
 	mov edx, dword ptr [esp+0x2C]
 	lea ecx, [esp+0x54]
 	mov dword ptr [esp+0x14], ebx
@@ -1470,8 +1161,10 @@
 	mov edx, dword ptr [esp+0x2C]
 	push edx
 	call 0x00402CA0
-	mov al, byte ptr [esp+0x2B]
 	add esp, 0x04
+
+@CombatPrize2_2:
+	mov al, byte ptr [esp+0x27]
 	mov byte ptr [esp+0x28], al
 	mov dword ptr [esp+0x2C], ebx
 	mov dword ptr [esp+0x30], ebx
@@ -1525,46 +1218,16 @@
 @L00000073:
 	mov ecx, dword ptr [esp+0x2C]
 	cmp ecx, ebx
-	jnz short @L00000074
-	xor eax, eax
-	jmp short @L00000075
-
-@L00000074:
+	jz @CombatPrize2_3
 	mov eax, dword ptr [esp+0x30]
 	sub eax, ecx
 	sar eax, 0x02
-
-; BUG代码段12
-@L00000075:
-	dec eax
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], eax
-	mov dword ptr [esp+0x1C], 0x00
-	fild qword ptr [esp+0x14]
-	fstp dword ptr [esp+0x10]
-	fld dword ptr [0x00841934]
-	fcomp dword ptr [esp+0x10]
-	fnstsw ax
-	and eax, 0x4100
-	jnz short @L00000076
-	fld dword ptr [esp+0x10]
-	mov dword ptr [esp+0x10], 0x00
-	fstp dword ptr [esp+0x1C]
-
-@L00000076:
-	call 0x00407410
+	mov dword ptr [esp+0x14], eax ; n
+	call 0x00407410 ; 获取随机数
 	xor edx, edx
-	mov ecx, 0x3E8
-	div ecx
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], edx
-	fild qword ptr [esp+0x14]
-	fmul dword ptr [0x0084198C]
-	fld dword ptr [esp+0x10]
-	fsub dword ptr [esp+0x1C]
-	fmulp
-	fadd dword ptr [esp+0x1C]
-	call 0x0073AD9C
+	mov ecx, dword ptr [esp+0x14] ; n
+	div ecx ; edx=0到n-1随机整数
+	mov eax, edx ; 0到n-1随机整数
 	mov edx, dword ptr [esp+0x2C]
 	lea ecx, [esp+0x5C]
 	mov dword ptr [esp+0x14], ebx
@@ -1595,8 +1258,10 @@
 	mov edx, dword ptr [esp+0x2C]
 	push edx
 	call 0x00402CA0
-	mov al, byte ptr [esp+0x2B]
 	add esp, 0x04
+
+@CombatPrize2_3:
+	mov al, byte ptr [esp+0x27]
 	mov byte ptr [esp+0x28], al
 	mov dword ptr [esp+0x2C], ebx
 	mov dword ptr [esp+0x30], ebx
@@ -1650,46 +1315,16 @@
 @L00000079:
 	mov ecx, dword ptr [esp+0x2C]
 	cmp ecx, ebx
-	jnz short @L00000080
-	xor eax, eax
-	jmp short @L00000081
-
-@L00000080:
+	jz @CombatPrize2_4
 	mov eax, dword ptr [esp+0x30]
 	sub eax, ecx
 	sar eax, 0x02
-
-; BUG代码段13
-@L00000081:
-	dec eax
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], eax
-	mov dword ptr [esp+0x1C], 0x00
-	fild qword ptr [esp+0x14]
-	fstp dword ptr [esp+0x10]
-	fld dword ptr [0x00841934]
-	fcomp dword ptr [esp+0x10]
-	fnstsw ax
-	and eax, 0x4100
-	jnz short @L00000082
-	fld dword ptr [esp+0x10]
-	mov dword ptr [esp+0x10], 0x00
-	fstp dword ptr [esp+0x1C]
-
-@L00000082:
-	call 0x00407410
+	mov dword ptr [esp+0x14], eax ; n
+	call 0x00407410 ; 获取随机数
 	xor edx, edx
-	mov ecx, 0x3E8
-	div ecx
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], edx
-	fild qword ptr [esp+0x14]
-	fmul dword ptr [0x0084198C]
-	fld dword ptr [esp+0x10]
-	fsub dword ptr [esp+0x1C]
-	fmulp
-	fadd dword ptr [esp+0x1C]
-	call 0x0073AD9C
+	mov ecx, dword ptr [esp+0x14] ; n
+	div ecx ; edx=0到n-1随机整数
+	mov eax, edx ; 0到n-1随机整数
 	mov edx, dword ptr [esp+0x2C]
 	lea ecx, [esp+0x64]
 	mov dword ptr [esp+0x14], ebx
@@ -1720,8 +1355,10 @@
 	mov edx, dword ptr [esp+0x2C]
 	push edx
 	call 0x00402CA0
-	fild dword ptr [esp+0x94] ; 经验
 	add esp, 0x04
+
+@CombatPrize2_4:
+	fild dword ptr [esp+0x90] ; 经验
 	fmul dword ptr [0x008480E0] ; float 1.3
 	call 0x0073AD9C
 	fild dword ptr [esp+0x84] ; 金钱
@@ -1743,6 +1380,8 @@
 	push eax
 	push 0x05
 	call 0x005C2F30
+
+@CombatPrize3_1:
 	mov al, byte ptr [esp+0x27]
 	mov dword ptr [esp+0x2C], ebx
 	mov byte ptr [esp+0x28], al
@@ -1792,46 +1431,16 @@
 @L00000086:
 	mov ecx, dword ptr [esp+0x2C]
 	cmp ecx, ebx
-	jnz short @L00000087
-	xor eax, eax
-	jmp short @L00000088
-
-@L00000087:
+	jz @L00000091
 	mov eax, dword ptr [esp+0x30]
 	sub eax, ecx
 	sar eax, 0x02
-
-; BUG代码段14
-@L00000088:
-	dec eax
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], eax
-	mov dword ptr [esp+0x1C], 0x00
-	fild qword ptr [esp+0x14]
-	fstp dword ptr [esp+0x10]
-	fld dword ptr [0x00841934]
-	fcomp dword ptr [esp+0x10]
-	fnstsw ax
-	and eax, 0x4100
-	jnz short @L00000089
-	fld dword ptr [esp+0x10]
-	mov dword ptr [esp+0x10], 0x00
-	fstp dword ptr [esp+0x1C]
-
-@L00000089:
-	call 0x00407410
+	mov dword ptr [esp+0x14], eax ; n
+	call 0x00407410 ; 获取随机数
 	xor edx, edx
-	mov ecx, 0x3E8
-	div ecx
-	mov dword ptr [esp+0x18], ebx
-	mov dword ptr [esp+0x14], edx
-	fild qword ptr [esp+0x14]
-	fmul dword ptr [0x0084198C]
-	fld dword ptr [esp+0x10]
-	fsub dword ptr [esp+0x1C]
-	fmulp
-	fadd dword ptr [esp+0x1C]
-	call 0x0073AD9C
+	mov ecx, dword ptr [esp+0x14] ; n
+	div ecx ; edx=0到n-1随机整数
+	mov eax, edx ; 0到n-1随机整数
 	mov edx, dword ptr [esp+0x2C]
 	lea ecx, [esp+0x48]
 	mov dword ptr [esp+0x14], ebx
@@ -2221,7 +1830,6 @@
 	add esp, 0x154
 	ret 0xD8
 
-!align 4
 @L00000111:
 	dword @L00000002
 	dword @L00000039
